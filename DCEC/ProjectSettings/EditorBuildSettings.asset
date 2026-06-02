@@ -8,6 +8,21 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Menu.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
+  - enabled: 1
+    path: Assets/Scenes/CopaArvore.unity
+    guid: 582571fb1b6d12a4ab047f31353a704e
+  - enabled: 1
+    path: Assets/Scenes/CopaBaralho.unity
+    guid: 74dd8f7c80576204ab5ee761869cefaa
+  - enabled: 1
+    path: Assets/Scenes/CopaTaca.unity
+    guid: a7cef382a066cd145841da64a9532739
+  - enabled: 1
+    path: Assets/Scenes/Copacabana.unity
+    guid: f60232c196f28534588d9d73079b377b
+  - enabled: 1
+    path: Assets/Scenes/GameOver.unity
+    guid: d3e4b2737b376da40a33d28f4c9b5b45
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0
