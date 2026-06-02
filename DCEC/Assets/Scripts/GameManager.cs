@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
     [Header("Cenas")]
     public string menuScene = "Menu";
     public string gameOverScene = "GameOver";
+    public string transicaoScene = "Transicao";
 
     private List<string> minigames = new List<string>
     {
@@ -18,13 +19,19 @@ public class GameManager : MonoBehaviour
         "Copacabana"
     };
 
-    [Header("Configurações")]
+    [Header("Configurações de Pontos")]
     public int pontosAcerto = 50;
     public int pontosErro = 35;
+
+    [Header("Configurações de Tempo")]
+    public float tempoInicial = 30f;      // Tempo do primeiro minigame
+    public float reducaoTempo = 2f;       // Quanto reduz a cada minigame
+    public float tempoMinimo = 5f;        // Nunca vai abaixo disso
 
     // Estado do jogo
     public int Vidas { get; private set; } = 3;
     public int Pontos { get; private set; } = 0;
+    public float TempoAtual { get; private set; }
     private string lastScene = "";
 
     void Awake()
@@ -44,28 +51,41 @@ public class GameManager : MonoBehaviour
     {
         Vidas = 3;
         Pontos = 0;
+        TempoAtual = tempoInicial;
         AudioManager.Instance.ResetMinigameMusic();
-        CarregarMinigameAleatorio();
+        CarregarProximoMinigame();
     }
 
     public void Acertou()
     {
         Pontos += pontosAcerto;
-        CarregarMinigameAleatorio();
+        ReduzirTempo();
+        CarregarTransicao();
     }
 
     public void Errou()
     {
-        Pontos = Mathf.Max(0, Pontos - pontosErro); // Pontos não vão abaixo de 0
+        Pontos = Mathf.Max(0, Pontos - pontosErro);
         Vidas--;
+        ReduzirTempo();
 
         if (Vidas <= 0)
             GameOver();
         else
-            CarregarMinigameAleatorio();
+            CarregarTransicao();
     }
 
-    void CarregarMinigameAleatorio()
+    void ReduzirTempo()
+    {
+        TempoAtual = Mathf.Max(tempoMinimo, TempoAtual - reducaoTempo);
+    }
+
+    void CarregarTransicao()
+    {
+        SceneManager.LoadScene(transicaoScene);
+    }
+
+    public void CarregarProximoMinigame()
     {
         List<string> available = new List<string>(minigames);
 
@@ -91,6 +111,7 @@ public class GameManager : MonoBehaviour
         AudioManager.Instance.PlayMenuMusic();
         Vidas = 3;
         Pontos = 0;
+        TempoAtual = tempoInicial;
         SceneManager.LoadScene(menuScene);
     }
 }
