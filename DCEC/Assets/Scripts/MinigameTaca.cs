@@ -7,10 +7,11 @@ public class MinigameTaca : MonoBehaviour
     [Header("UI")]
     [SerializeField] private Image barraTaca;
     [SerializeField] private Image zonaAlvo;
+    [SerializeField] private Slider sliderApoio;
     [SerializeField] private TextMeshProUGUI textInstrucao;
 
     [Header("Configurações")]
-    [SerializeField] private float sensibilidade = 0.005f; // quanto o arrasto afeta o enchimento
+    [SerializeField] private float sensibilidade = 0.00f;
     [SerializeField] private float tamanhoZonaMin = 0.1f;
     [SerializeField] private float tamanhoZonaMax = 0.25f;
 
@@ -23,9 +24,14 @@ public class MinigameTaca : MonoBehaviour
 
     void Start()
     {
+        // Configura o slider
+        sliderApoio.minValue = 0f;
+        sliderApoio.maxValue = 1f;
+        sliderApoio.value = 0f;
+        sliderApoio.interactable = false; // só visual, jogador não arrasta
+
         GerarDesafio();
 
-        // Instrução para o jogador
         if (textInstrucao != null)
             textInstrucao.text = "Segure e arraste para cima!";
     }
@@ -40,6 +46,7 @@ public class MinigameTaca : MonoBehaviour
 
         nivelAtual = 0f;
         barraTaca.fillAmount = 0f;
+        sliderApoio.value = 0f;
         jogoAtivo = true;
     }
 
@@ -64,7 +71,6 @@ public class MinigameTaca : MonoBehaviour
     {
         if (!jogoAtivo) return;
 
-        // Começou a segurar
         if (Input.GetMouseButtonDown(0))
         {
             segurando = true;
@@ -74,7 +80,6 @@ public class MinigameTaca : MonoBehaviour
                 textInstrucao.gameObject.SetActive(false);
         }
 
-        // Soltou
         if (Input.GetMouseButtonUp(0) && segurando)
         {
             segurando = false;
@@ -84,21 +89,19 @@ public class MinigameTaca : MonoBehaviour
             Resultado(acertou);
         }
 
-        // Arrastando
         if (segurando)
         {
             float deltaMouse = Input.mousePosition.y - mousePosAnterior;
             mousePosAnterior = Input.mousePosition.y;
 
-            // Só enche se arrastar para cima (delta positivo)
             if (deltaMouse > 0)
             {
                 nivelAtual += deltaMouse * sensibilidade;
                 nivelAtual = Mathf.Clamp01(nivelAtual);
                 barraTaca.fillAmount = nivelAtual;
+                sliderApoio.value = nivelAtual; // atualiza slider junto
             }
 
-            // Transbordou
             if (nivelAtual >= 1f)
             {
                 jogoAtivo = false;

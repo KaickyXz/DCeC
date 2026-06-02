@@ -25,25 +25,35 @@ public class TelaTransicao : MonoBehaviour
     {
         for (int i = 0; i < iconesVidas.Length; i++)
         {
-            iconesVidas[i].SetActive(i < GameManager.Instance.Vidas);
+            if (iconesVidas[i] != null) // Boa prática para evitar erros bobos na Jam
+                iconesVidas[i].SetActive(i < GameManager.Instance.Vidas);
         }
     }
 
     IEnumerator ContarPontos()
     {
-        int pontosExibidos = 0;
+        float pontosExibidos = 0f;
         int pontosAlvo = GameManager.Instance.Pontos;
 
-        while (pontosExibidos != pontosAlvo)
+        // Garante que o texto exiba pelo menos "0" se a pontuação for zero
+        textPontos.text = "0";
+
+        // Se o alvo for maior que 0, faz a contagem progressiva
+        while (pontosExibidos < pontosAlvo)
         {
-            pontosExibidos = (int)Mathf.MoveTowards(
+            pontosExibidos = Mathf.MoveTowards(
                 pontosExibidos,
                 pontosAlvo,
                 velocidadeContagem * Time.deltaTime
             );
-            textPontos.text = pontosExibidos.ToString();
+
+            // Arredonda para o inteiro mais próximo apenas para exibir visualmente
+            textPontos.text = Mathf.RoundToInt(pontosExibidos).ToString();
             yield return null;
         }
+
+        // Garante que o valor final exato seja exibido no término do loop
+        textPontos.text = pontosAlvo.ToString();
     }
 
     IEnumerator EsperarEAvancar()

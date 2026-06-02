@@ -43,7 +43,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
             Debug.Log("Olá");
 
             podeMovimentar = false;
-            transform.position = new Vector2(-8, -2.8f);
+            transform.position = new Vector2(-7, -3.8f);
         }
 
        

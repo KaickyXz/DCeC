@@ -5,55 +5,47 @@ using System.Collections.Generic;
 public class MinigameBaralho : MonoBehaviour
 {
     [Header("Potes")]
-    [SerializeField] private GameObject[] potes;
-    [SerializeField] private float duracaoEmbaralhar = 0.4f;
-    [SerializeField] private int quantidadeTrocas = 5;
+    [SerializeField] private GameObject[] potes; // 3 potes no total
+    [SerializeField] private float duracaoEmbaralhar = 1f; // duração de cada troca
+    [SerializeField] private int quantidadeTrocas = 5; // quantas vezes embaralha
 
-    [Header("Cartas")]
-    [SerializeField] private GameObject cartaCopa;
-    [SerializeField] private GameObject[] cartasErradas; // arrasta as 2 cartas erradas aqui
+    [Header("Cartas (filhos dos potes)")]
+    [SerializeField] private GameObject cartaCopa; // a carta correta (copa)
 
     private int indexCartaCorreta;
     private bool podeClicar = false;
 
     void Start()
     {
+        // Começa com a carta correta no pote 0
         indexCartaCorreta = 0;
         StartCoroutine(RotinaMiniGame());
     }
 
     IEnumerator RotinaMiniGame()
     {
-        // Mostra todas as cartas por 3 segundos
-        yield return new WaitForSeconds(1f);
+        // Mostra as cartas por 2 segundos antes de esconder
+        yield return new WaitForSeconds(2f);
 
-        // Pisca a carta correta para chamar atenção
-        yield return StartCoroutine(PiscarCarta());
-
-        // Esconde tudo e embaralha
+        // Esconde as cartas (potes tampam)
         EsconderCartas();
-        yield return new WaitForSeconds(0.5f);
-        yield return StartCoroutine(Embaralhar());
-        podeClicar = true;
-    }
 
-    IEnumerator PiscarCarta()
-    {
-        SpriteRenderer sr = cartaCopa.GetComponent<SpriteRenderer>();
-        for (int i = 0; i < 3; i++)
-        {
-            sr.enabled = false;
-            yield return new WaitForSeconds(0.2f);
-            sr.enabled = true;
-            yield return new WaitForSeconds(0.2f);
-        }
+        yield return new WaitForSeconds(0.5f);
+
+        // Embaralha
+        yield return StartCoroutine(Embaralhar());
+
+        // Libera o clique
+        podeClicar = true;
     }
 
     void EsconderCartas()
     {
         cartaCopa.SetActive(false);
-        foreach (var carta in cartasErradas)
+        // Esconde as outras cartas também (filhos dos outros potes)
+        foreach (var pote in potes)
         {
+            var carta = pote.transform.GetChild(0).gameObject;
             carta.SetActive(false);
         }
     }
@@ -62,12 +54,14 @@ public class MinigameBaralho : MonoBehaviour
     {
         for (int i = 0; i < quantidadeTrocas; i++)
         {
+            // Escolhe dois potes aleatórios diferentes para trocar
             int a = Random.Range(0, potes.Length);
             int b;
             do { b = Random.Range(0, potes.Length); } while (b == a);
 
             yield return StartCoroutine(TrocarPotes(a, b));
 
+            // Atualiza qual pote tem a carta correta
             if (indexCartaCorreta == a) indexCartaCorreta = b;
             else if (indexCartaCorreta == b) indexCartaCorreta = a;
 
@@ -87,15 +81,19 @@ public class MinigameBaralho : MonoBehaviour
             tempo += Time.deltaTime;
             float t = tempo / duracaoEmbaralhar;
 
+            // Pote A faz um arco por cima
             potes[a].transform.position = QuadraticBezier(posA, meio, posB, t);
+            // Pote B faz o caminho inverso
             potes[b].transform.position = QuadraticBezier(posB, meio, posA, t);
 
             yield return null;
         }
 
+        // Garante posição final exata
         potes[a].transform.position = posB;
         potes[b].transform.position = posA;
 
+        // Troca as referências no array
         GameObject temp = potes[a];
         potes[a] = potes[b];
         potes[b] = temp;
@@ -113,15 +111,16 @@ public class MinigameBaralho : MonoBehaviour
         if (!podeClicar) return;
         podeClicar = false;
 
-        TimerManager timer = FindAnyObjectByType<TimerManager>();
-        if (timer != null) timer.PararTimer();
-
         if (indexPote == indexCartaCorreta)
         {
+            Debug.Log("Acertou!");
+            FindObjectOfType<TimerManager>().PararTimer();
             GameManager.Instance.Acertou();
         }
         else
         {
+            Debug.Log("Errou!");
+            FindObjectOfType<TimerManager>().PararTimer();
             GameManager.Instance.Errou();
         }
     }
